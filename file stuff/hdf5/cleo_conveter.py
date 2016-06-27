@@ -31,3 +31,5 @@ def get_collisions(infile):
                 event_particles = particles[n_start:n_end]
 
                 for k in event_particles:
+                    
+                    
