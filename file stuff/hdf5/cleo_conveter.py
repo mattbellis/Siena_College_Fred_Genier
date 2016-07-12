@@ -1,40 +1,55 @@
-def get_collisions(infile):
+def get_collisions(infile, filetype=None, returntype=None):
     
-    print "Reading in data..."
+    # File type can be:
+    #    text (default)
+    #    text zipped 
+    #
+    #    npy
+    #    npz
+    #    npz_compressed
+    #
+    #    hdf5
+    #    hdf5 compressed
+    #
+    # Return type can be:
+    #    list of lists
+    #    dictionary of lists/arrays
+    #    dictionary of dictionaries 
+    #    rec arrary (???????? only given time)
     
-    start = time.time()
     
-    with h5py.File(infile,'r') as hf:
+    if filetype=="hdf5":
 
-        npions = hf.get('npions').value
-        nkaons = hf.get('nkaons').value
-        nmuons = hf.get('nmuons').value
-        nelecs = hf.get('nelectrons').value
-        nphots = hf.get('nphotons').value
+        with h5py.File(infile,'r') as hf:
 
-        pions = hf.get('particles/pions').value
-        kaons = hf.get('particles/kaons').value
-        muons = hf.get('particles/muons').value
-        elecs = hf.get('particles/electrons').value
-        phots = hf.get('particles/photons').value
+            npions = hf.get('npions').value
+            nkaons = hf.get('nkaons').value
+            nmuons = hf.get('nmuons').value
+            nelecs = hf.get('nelectrons').value
+            nphots = hf.get('nphotons').value
 
-        #print "Read in the all the data in %f seconds" % (time.time()-start)
+            pions = hf.get('particles/pions').value
+            kaons = hf.get('particles/kaons').value
+            muons = hf.get('particles/muons').value
+            elecs = hf.get('particles/electrons').value
+            phots = hf.get('particles/photons').value
 
-        nlist = [npions,nkaons,nmuons,nelecs,nphots]
-        plist = [pion,kaon,muon,elec,phot]
-        elist = [pions,kaons,muons,electrons,photons]
+            #print "Read in the all the data in %f seconds" % (time.time()-start)
 
-        for i in range(0,len(nlist)):
+            nlist = [npions,nkaons,nmuons,nelecs,nphots]
+            plist = [pion,kaon,muon,elec,phot]
+            elist = [pions,kaons,muons,electrons,photons]
 
-            n_particles = nlist[i]
-            particles = plist[i]
-            outlist = elist[i]
-            n_start = 0
+            for i in range(0,len(nlist)):
 
-            for j in n_particles:
+                n_particles = nlist[i]
+                particles = plist[i]
+                outlist = elist[i]
+                n_start = 0
 
-                n_end = n_start + j
-                #print n_start,n_end
+                for j in n_particles:
 
-                event_particles = particles[n_start:n_end]
-                
+                    n_end = n_start + j
+                    #print n_start,n_end
+
+                    event_particles = particles[n_start:n_end]
