@@ -1,6 +1,6 @@
 ################################################################################
 
-def get_collisions_from_filename(infilename,verbose=False):
+def is_zip_txt(infilename,verbose=False):
 
     infile = None
     if zipfile.is_zipfile(infilename) is True:
@@ -9,9 +9,62 @@ def get_collisions_from_filename(infilename,verbose=False):
     else:
         infile = open(infilename)
 
-    collisions = get_collisions(infile,verbose)
+    return infile
 
-    return collisions
+################################################################################
+
+def returntype(var):
+    
+    if returntype == None or returntype == "list":
+        
+        return var
+    
+    elif returntype == "dictionary":
+        
+        d_events = []
+        
+        for i in var:
+    
+            pions,kaons,muons,electrons,photons = i
+
+            pis = []
+            kas = []
+            mus = []
+            els = []
+            phs = []
+            
+            #e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy
+
+            for pion in pions:
+                e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy=pion
+                pidi = {"e":e,"px":px,"py":py,"pz":pz,"q":q,"likpi":likpi,"likka":likka,"nphoka":nphoka,"depthmu":depthmu,"cluster_energy":cluster_energy}
+                pis.append(pidi)
+
+            for kaon in kaons:
+                e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy=kaon
+                kadi = {"e":e,"px":px,"py":py,"pz":pz,"q":q,"likpi":likpi,"likka":likka,"nphoka":nphoka,"depthmu":depthmu,"cluster_energy":cluster_energy}
+                kas.append(kadi)
+
+            for muon in muons:
+                e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy=muon
+                mudi = {"e":e,"px":px,"py":py,"pz":pz,"q":q,"likpi":likpi,"likka":likka,"nphoka":nphoka,"depthmu":depthmu,"cluster_energy":cluster_energy}
+                mus.append(mudi)
+
+            for electron in electrons:
+                e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy=electron
+                eldi = {"e":e,"px":px,"py":py,"pz":pz,"q":q,"likpi":likpi,"likka":likka,"nphoka":nphoka,"depthmu":depthmu,"cluster_energy":cluster_energy}
+                els.append(eldi)
+
+            for photon in photons:
+                e,px,py,pz=photon
+                phdi = {"e":e,"px":px,"py":py,"pz":pz}
+                phs.append(phdi)
+
+            ev = {"pions":pis,"kaons":kas,"muons":mus,"electrons":els,"photons":phs}
+
+            d_events.append(ev)
+            
+        return d_events
 
 ################################################################################
 
@@ -38,6 +91,8 @@ def get_collisions(infile, filetype=None, returntype=None):
     
     if filetype == None or filetype == "txt":
         
+        infile = is_zip_txt(infile) # this may raise an issue -  needs testing
+        
         collisions = []
 
         not_at_end = True
@@ -48,10 +103,7 @@ def get_collisions(infile, filetype=None, returntype=None):
             # Read in one collision
             
             line = infile.readline()
-
-            if collision_count%1000==0 and verbose:
-                print "collision count: ",collision_count
-
+            
             if line=="":
                 not_at_end = False
 
@@ -175,7 +227,7 @@ def get_collisions(infile, filetype=None, returntype=None):
 
                 collisions.append([pions,kaons,muons,electrons,photons])
 
-        return collisions
+        returntype(collisions)
     
     ################################################################################
     
@@ -244,14 +296,27 @@ def get_collisions(infile, filetype=None, returntype=None):
 
                 h5_events.append(ev)
                 
+        returntype(h5_events)
+                
     elif filetype == "npy":
         
         npy = np.load(infile)
+        
+        returntype(npy)
         
     elif filetype == "npz":
         
         npz = np.load(infile)['arr_0']
         
+        returntype(npz)
+        
+    elif filetype == "zip"
+    
+        
+        
+    else:
+        
+        return "Something went wrong."
         
         
         
