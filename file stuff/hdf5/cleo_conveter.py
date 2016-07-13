@@ -19,7 +19,7 @@ def returntype(var):
         
         return var
     
-    elif returntype == "dictionary":
+    elif returntype == "dictionary": # dictionary of dictionaries
         
         d_events = []
         
@@ -33,8 +33,7 @@ def returntype(var):
             els = []
             phs = []
             
-            #e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy
-
+            
             for pion in pions:
                 e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy=pion
                 pidi = {"e":e,"px":px,"py":py,"pz":pz,"q":q,"likpi":likpi,"likka":likka,"nphoka":nphoka,"depthmu":depthmu,"cluster_energy":cluster_energy}
@@ -65,6 +64,56 @@ def returntype(var):
             d_events.append(ev)
             
         return d_events
+    
+    elif returntype == "dictionary_list": # dictionary containing lists
+        
+        d_events = []
+        
+        for i in var:
+    
+            pions,kaons,muons,electrons,photons = i
+
+            pis = []
+            kas = []
+            mus = []
+            els = []
+            phs = []
+            
+            
+            for pion in pions:
+                e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy=pion
+                
+                pis.append(pion)
+
+            for kaon in kaons:
+                e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy=kaon
+                
+                kas.append(kaon)
+
+            for muon in muons:
+                e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy=muon
+                
+                mus.append(muon)
+
+            for electron in electrons:
+                e,px,py,pz,q,sigpi,sigka,likpi,likka,nphopi,nphoka,depthmu,cluster_energy=electron
+                
+                els.append(electron)
+
+            for photon in photons:
+                e,px,py,pz=photon
+                
+                phs.append(photon)
+
+            ev = {"pions":pis,"kaons":kas,"muons":mus,"electrons":els,"photons":phs}
+
+            d_events.append(ev)
+            
+        return d_events
+    
+    else:
+        
+        print "ERROR: Invalid returntype. Valid returntypes include: 'list' (default), 'dictionary', and 'dictionary_list'."
 
 ################################################################################
 
@@ -309,14 +358,10 @@ def get_collisions(infile, filetype=None, returntype=None):
         npz = np.load(infile)['arr_0']
         
         returntype(npz)
-        
-    elif filetype == "zip"
-    
-        
-        
+   
     else:
         
-        return "Something went wrong."
+        print "ERROR: Invalid filetype. Valid filetypes include: 'txt' (default), 'hdf5', 'npy', and 'npz'."
         
         
         
