@@ -1,9 +1,13 @@
+import zipfile
+
 ################################################################################
 
 def is_zip_txt(infilename,verbose=False):
+    
 
     infile = None
     if zipfile.is_zipfile(infilename) is True:
+        print "Unzipping!!!!"
         z = zipfile.ZipFile(infilename,'r')
         infile = z.open(z.namelist()[0],'r')
     else:
@@ -117,7 +121,7 @@ def returntype(var):
 
 ################################################################################
 
-def get_collisions(infile, filetype=None, returntype=None):
+def get_collisions(infilename, filetype=None, returntype=None):
     
     # File type can be:
     #    text (default)
@@ -140,7 +144,7 @@ def get_collisions(infile, filetype=None, returntype=None):
     
     if filetype == None or filetype == "txt":
         
-        infile = is_zip_txt(infile) # this may raise an issue -  needs testing
+        infile = is_zip_txt(infilename) # this may raise an issue -  needs testing
         
         collisions = []
 
@@ -275,8 +279,11 @@ def get_collisions(infile, filetype=None, returntype=None):
                 collision_count += 1
 
                 collisions.append([pions,kaons,muons,electrons,photons])
-
-        returntype(collisions)
+        
+        if returntype=="lists" or returntype==None:
+            return collisions
+        
+        #returntype(collisions)
     
     ################################################################################
     
