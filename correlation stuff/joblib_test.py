@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 #from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sn
 import time
@@ -10,8 +10,8 @@ def distance(a,b):
     d = np.sqrt( (b[0]-a[0])**2 + (b[1]-a[1])**2 + (b[2]-a[2])**2 )
     return d
 
-random = np.loadtxt('10k_weighted_random.dat')
-data = np.loadtxt('10k_weighted_north_cmass.dat')
+random = np.loadtxt('100k_weighted_random.dat')
+data = np.loadtxt('100k_weighted_north_cmass.dat')
 
 dt=data.transpose()
 rt=random.transpose()
@@ -29,11 +29,11 @@ cdist = cd.value * 0.7
 rcd = cosmo.comoving_distance(rt[2])
 rcdist = rcd.value * 0.7
 
-d_conv=s2c(dt)
+d_conv=s2c(dt,cdist)
 
 r_conv=s2c(rt)
 
-ndivs = 4
+ndivs = 20
 
 rxpts = np.linspace(np.round(min(r_conv[0])),np.round(max(r_conv[0])),ndivs)
 rypts = np.linspace(np.round(min(r_conv[1])),np.round(max(r_conv[1])),ndivs)
@@ -131,11 +131,13 @@ def worker1(dpt):
 
         # DD
         d_dist=distance(pos1,pos2)
+        d_hist=np.histogram(d_dist,nbins)[0]
         
         # DR
         dr_dist=distance(pos1,r_nn_subdiv[:].transpose())
+        dr_hist=np.histogram(dr_dist,nbins)[0]
         
-        return d_dist,dr_dist
+        return d_hist,dr_hist
         
         
 def worker2(rpt):
@@ -149,14 +151,16 @@ def worker2(rpt):
             
             # RR
         r_dist=distance(pos1,pos2)
+        r_hist=np.histogram(r_dist,nbins)[0]
         
         # DR FOR ALL OF THEM, but don't double count!
         if not (nni==i and nnj==j and nnk==k):
             dr_dist=distance(pos1,d_nn_subdiv[:].transpose())
+            dr_hist=np.histogram(dr_dist,nbins)[0]
             
-            return r_dist,dr_dist
+            return r_hist,dr_hist
             
-        return r_dist
+        return r_hist,np.zeros(len(r_hist))
             
     
 
@@ -184,7 +188,6 @@ for i in range(nsubs):
         for k in range(nsubs):
             
             home = "%02d%02d%02d" % (i,j,k)
-            #print(home)
 
             d_home_subdiv = np.array(ddivs_master[home]).transpose()
             r_home_subdiv = np.array(rdivs_master[home]).transpose()
@@ -197,42 +200,38 @@ for i in range(nsubs):
                     for nnk in range(k,k+2):
                         
                         if nni<nsubs and nnj<nsubs and nnk<nsubs:
+                            
                             nn = "%02d%02d%02d" % (nni,nnj,nnk)
-                            #print("\t",nn)
                             
                             d_nn_subdiv = np.array(ddivs_master[nn]).transpose()
                             r_nn_subdiv = np.array(rdivs_master[nn]).transpose()
                             
-                            #print("dlen: ",len(d_nn_subdiv))
-                            #print("rlen: ",len(r_nn_subdiv))
-
-                            #hdd = []
-                            #hdr = []
-                            #hrr = []
-                            
-                            results=Parallel(n_jobs=4,verbose=11)(delayed(worker1)(dpt)for dpt in range(0,len(d_home_subdiv)))
-                            res_t = np.array(results).transpose() 
-
-                            #h_dr = np.histogram(res_t[1].transpose(),bins=nbins,range=(0,200))
-                            #hist_dr += h_dr[0]
-                            
-                                
-                            #h_dd = np.histogram(res_t[0].transpose(),bins=nbins,range=(0,200))
-                            #hist_dd += h_dd[0]
-                            
-                            results=Parallel(n_jobs=4,verbose=11)(delayed(worker2)(rpt)for rpt in range(0,len(r_home_subdiv)))
+                            results=Parallel(n_jobs=4)(delayed(worker1)(dpt)for dpt in range(0,len(d_home_subdiv)))
                             res_t = np.array(results).transpose()
                             
-                            # Histogram after getting the numbers
-                            #h_rr = np.histogram(res_t[0].transpose(),bins=nbins,range=(0,200))
-                            #hist_rr += h_rr[0]
-
-                            #h_dr = np.histogram(res_t[1].transpose(),bins=nbins,range=(0,200))
-                            #hist_dr += h_dr[0]
+                            for h in res_t:
+                                
+                                hist_dd+=h[0,0]
+                                hist_dr+=h[1,0]
 
                             
+                            results=Parallel(n_jobs=4)(delayed(worker2)(rpt)for rpt in range(0,len(r_home_subdiv)))
+                            res_t = np.array(results).transpose()
+                            #print(len(res_t[0]))
                             
-
+                            if len(res_t) is 2:
+                                
+                                
+                                for h in res_t:
+                                
+                                    hist_rr+=h[0,0]
+                                    hist_dr+=h[1,0]
+                            else:
+                                #print("Here!")
+                                for h in res_t:
+                                    #print(len(h))
+                                    hist_rr+=h[0,0]
+                                    
                                 
 end=time.time()
 print("Done! Took %.2f seconds" % (end-start))
